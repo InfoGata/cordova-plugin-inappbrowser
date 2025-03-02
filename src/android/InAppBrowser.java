@@ -1325,6 +1325,29 @@ public class InAppBrowser extends CordovaPlugin {
          */
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            try {
+                
+                JSONObject data = new JSONObject();
+                data.put("type", "intercept");
+                data.put("url", request.getUrl().toString());
+
+                var headers = new JSONObject();
+                request.getRequestHeaders().forEach((key, value) -> {
+                    try {
+                        headers.put(key, value);
+                    } catch (JSONException e) {
+                        LOG.e(LOG_TAG, "Error adding header to JSON: " + e.getMessage());
+                    }
+                });
+                data.put("headers", headers);
+
+                JSONObject succObj = new JSONObject();
+                succObj.put("type", MESSAGE_EVENT);
+                succObj.put("data", data);
+                sendUpdate(succObj, true);
+            } catch (JSONException ex) {
+                LOG.e(LOG_TAG, "URI passed in has caused a JSON error.");
+            }
             return shouldInterceptRequest(request.getUrl().toString(), super.shouldInterceptRequest(view, request), request.getMethod());
         }
 
